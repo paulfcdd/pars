@@ -1,16 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: paulf_000
- * Date: 2016-06-29
- * Time: 22:24
- */
-
 namespace ParserBundle\Controller;
 
+use Doctrine\ORM\Query;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Doctrine\DBAL\Driver\PDOSqlite as pdo;
-use ParserBundle\Entity\Pozycje;
+
 class MainController extends Controller
 {
     protected function getDocument()
@@ -22,12 +16,16 @@ class MainController extends Controller
         return $excelObj;
     }
 
+    protected function getDB()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $dbrecords = $em->getRepository('ParserBundle:Pozycje');
+        return $dbrecords;
+    }
+
     public function indexAction()
     {
-        $pozycje = new Pozycje();
-        $em = $this->getDoctrine()->getManager();
-        $foo = $em->getRepository('ParserBundle:Pozycje')->findBy(array('id'=> 2));
-        var_dump($foo);
+
         $sheetsList = $this->getDocument()->getSheetNames();
 
         return $this->render('parser/index.html.twig', array(
@@ -40,15 +38,59 @@ class MainController extends Controller
         $worksheet = $this->getDocument()->getSheetByName($sheetName)->toArray();
 
         unset($worksheet[0]);
+
         unset($worksheet[1]);
 
-        foreach ($worksheet as $item) {
-            if ($item[0] !== null) {
-                var_dump($item);
+        $worksheet = array_filter($worksheet,
+            function ($arr) {
+                return $arr[0] !== null;
+            });
+
+        $worksheet = array_values($worksheet);
+
+        /*
+         * DB repository
+         */
+        $dbRepo = $this->getDB();
+//
+        for ($i = 0; $i < count($worksheet); $i++) {
+            $excelId = $worksheet[$i][0];
+            $label = $worksheet[$i][2];
+            $fromDb = $dbRepo->findBy(array('label' => $label));
+            if (!empty($fromDb)) {
+
+                if ($excelId == $fromDb[0]->getExcelId()) {
+                    $newPrice = $worksheet[$i][5];
+                    $this->getDoctrine()->getManager()->persist($fromDb[0]->setPrice($newPrice));
+                    $this->getDoctrine()->getManager()->flush();
+                    var_dump($fromDb[0]);
+                } else {
+                    echo 'No matches';
+                    die;
+                }
             }
+//            var_dump($worksheet);
         }
+
+//        var_dump($worksheet);
+
+//        $dbRecords = $dbRepo->findAll(Query::HYDRATE_ARRAY);
+//
+//        for ($i = 0; $i < count($worksheet); $i++) {
+//            $opisPozycji = $worksheet[$i][2];
+//
+//            $dbLabel = $dbRepo->findBy(array('label' => $opisPozycji));
+//            if (!empty($dbLabel)) {
+//                $newPrice = $worksheet[$i][5];
+//                $this->getDoctrine()->getManager()->persist($dbLabel[0]->setPrice($newPrice));
+//                $this->getDoctrine()->getManager()->flush();
+//                var_dump($dbLabel);
+//            }
+//        }
+
         return $this->render('parser/sheet.html.twig', array(
-            'sheetName' => $sheetName
+            'sheetName' => $sheetName,
+            'worksheet' => $worksheet
         ));
     }
 }

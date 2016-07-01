@@ -1,1 +1,24 @@
-{{ sheetName }}
+<b>Current worksheet: </b> {{ sheetName }}
+
+{#<div style="width: 100%">#}
+    {#<div>#}
+        {#<table>#}
+            {#<tr>#}
+                {#<th>Lp</th>#}
+                {#<th>Kod</th>#}
+                {#<th>Opis</th>#}
+                {#<th>Jm.</th>#}
+                {#<th>Cena jedn. roboty [zl]</th>#}
+            {#</tr>#}
+            {#{% for singlesheet in worksheet %}#}
+                {#<tr>#}
+                    {#<td>{{ singlesheet.0 }}</td>#}
+                    {#<td>{{ singlesheet.1 }}</td>#}
+                    {#<td>{{ singlesheet.2 }}</td>#}
+                    {#<td>{{ singlesheet.3 }}</td>#}
+                    {#<td>{{ singlesheet.5 }}</td>#}
+                {#</tr>#}
+            {#{% endfor %}#}
+        {#</table>#}
+    {#</div>#}
+{#</div>#}
