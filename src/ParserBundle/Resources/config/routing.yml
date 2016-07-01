@@ -1,0 +1,7 @@
+parser_homepage:
+    path:     /
+    defaults: { _controller: ParserBundle:Main:index }
+
+sheet_path:
+    path: /{sheetName}
+    defaults: { _controller: ParserBundle:Main:singleSheet }

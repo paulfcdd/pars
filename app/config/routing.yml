@@ -1,0 +1,7 @@
+parser:
+    resource: "@ParserBundle/Resources/config/routing.yml"
+    prefix:   /
+
+app:
+    resource: "@AppBundle/Controller/"
+    type:     annotation
